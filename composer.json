@@ -1,5 +1,5 @@
 {
-  "name": "fire_and_forget",
+  "name": "fireandforget",
   "version": "1.0.0",
   "require": {
     "league/uri-schemes": "^1.2"
