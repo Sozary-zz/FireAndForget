@@ -1,0 +1,5 @@
+{
+    "require": {
+        "league/uri-schemes": "^1.2"
+    }
+}
