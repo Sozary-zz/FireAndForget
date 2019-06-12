@@ -13,12 +13,12 @@ final class FireAndForget
 
     public function get($url, $params)
     {
-        $this->fire(strtoupper(__FUNCTION__), $url, $params);
+        $this->send(strtoupper(__FUNCTION__), $url, $params);
     }
 
     public function post($url, $params)
     {
-        $this->fire(strtoupper(__FUNCTION__), $url, $params);
+        $this->send(strtoupper(__FUNCTION__), $url, $params);
     }
 
     private function getDefaultPort($scheme)
@@ -53,7 +53,7 @@ final class FireAndForget
         return $headers . "\r\n" . $body;
     }
 
-    private function fire($method, $url, $params)
+    private function send($method, $url, $params)
     {
         try {
             $url =  Uri\Http::createFromString($url);
