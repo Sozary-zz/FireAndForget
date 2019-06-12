@@ -13,12 +13,12 @@ final class FireAndForget
 
     public function get($url, $params)
     {
-        $this->fire("GET", $url, $params);
+        $this->fire(strtoupper(__FUNCTION__), $url, $params);
     }
 
     public function post($url, $params)
     {
-        $this->fire("POST", $url, $params);
+        $this->fire(strtoupper(__FUNCTION__), $url, $params);
     }
 
     private function getDefaultPort($scheme)
