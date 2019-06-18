@@ -61,8 +61,8 @@ final class FireAndForget
     {
         try {
             $url =  Uri\Http::createFromString($url);
-        } catch (RuntimeException $e) {
-            throw new InvalidArgumentException($e->getMessage());
+        } catch (\RuntimeException $e) {
+            throw new \InvalidArgumentException($e->getMessage());
         }
 
         $scheme = $url->getScheme() === "https" ? "ssl://" : "";
@@ -71,7 +71,7 @@ final class FireAndForget
         $request = $this->getRequest($method, $url, $auth, $params);
         $socket  = @fsockopen($host, $port, $errno, $errstr, $this->connectionTimeout);
         if (!$socket) {
-            throw new SocketException($errstr, $errno);
+            throw new \SocketException($errstr, $errno);
         }
         fwrite($socket, $request);
         fclose($socket);
