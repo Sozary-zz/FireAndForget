@@ -1,7 +1,27 @@
 {
   "name": "fireandforget/faf",
-  "version": "1.0.0",
+  "description": "A simple way to send a request without waiting for a response.",
+  "keywords": [
+    "socket",
+    "post",
+    "get",
+    "request",
+    "http"
+  ],
+  "homepage": "https://github.com/Sozary/FireAndForget",
+  "type": "library",
+  "license": "MIT",
+  "version": "1.0.1",
   "require": {
     "league/uri-schemes": "^1.2"
+  },
+  "authors": [{
+    "name": "Mehdi Ayache",
+    "email": "mehdiayache@hotmail.fr"
+  }],
+  "autoload": {
+    "psr-4": {
+      "Sozary\\FireAndForget\\": "src/"
+    }
   }
 }
