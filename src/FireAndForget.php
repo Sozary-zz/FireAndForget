@@ -2,6 +2,7 @@
 namespace Sozary\FireAndForget;
 
 use League\Uri;
+use Sozary\FireAndForget\Exceptions\SocketException;
 
 final class FireAndForget
 {
@@ -71,7 +72,7 @@ final class FireAndForget
         $request = $this->getRequest($method, $url, $auth, $params);
         $socket  = @fsockopen($host, $port, $errno, $errstr, $this->connectionTimeout);
         if (!$socket) {
-            throw new \SocketException($errstr, $errno);
+            throw new SocketException($errstr, $errno);
         }
         fwrite($socket, $request);
         fclose($socket);
