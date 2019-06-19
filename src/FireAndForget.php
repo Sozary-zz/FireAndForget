@@ -2,34 +2,25 @@
 namespace Sozary\FireAndForget;
 
 use League\Uri;
-use Sozary\FireAndForget\Exceptions\SocketException;
+use Sozary\FireAndForget\SocketException;
+use Sozary\FireAndForget\MethodException;
 
 final class FireAndForget
 {
     private $connectionTimeout;
+    private $accepted_method = ["GET", "POST", "PATCH", "OPTION", "DELETE"];
 
     function __construct($connectionTimeout = 3)
     {
         $this->connectionTimeout = $connectionTimeout;
     }
 
-    public function get($url,  $params = [], $auth = null)
-    {
-        $this->send(strtoupper(__FUNCTION__), $url, $auth, $params);
-    }
-
-    public function post($url, $params = [], $auth = null)
-    {
-        $this->send(strtoupper(__FUNCTION__), $url, $auth,  $params);
-    }
-
-    private function getDefaultPort($scheme)
+    private function getPortIfNotDefined($scheme)
     {
         switch ($scheme) {
             case 'https':
                 return 443;
             case 'http':
-                return 80;
             default:
                 return 80;
         }
@@ -37,13 +28,12 @@ final class FireAndForget
 
     private function getHeaders($method, $url, $auth,  $queryString)
     {
-        $path = $method === 'GET' ? $url->getPath() . "?" . $queryString : $url->getPath();
-        $headers = $method . " " . $path . " HTTP/1.1\r\n";
+        $headers = $method . " " . ($method === 'GET' ? $url->getPath() . "?" . $queryString : $url->getPath()) . " HTTP/1.1\r\n";
         $headers .= "Host: " . $url->getHost() . "\r\n";
         $headers .= "Content-Type: application/x-www-form-urlencoded\r\n";
         $headers .= "Content-Length: " . strlen($queryString) . "\r\n";
         if ($auth) {
-            $headers .= "Authorization: Bearer " . $auth . "\r\n";
+            $headers .= "Authorization: " . $auth . "\r\n";
         }
         $headers .= "Connection: Close\r\n";
         return $headers;
@@ -53,28 +43,25 @@ final class FireAndForget
     private function getRequest($method, $url, $auth, $params)
     {
         $queryString = http_build_query($params);
-        $headers     = $this->getHeaders($method, $url, $auth, $queryString);
-        $body        = $method === 'GET' ? '' : $queryString;
-        return $headers . "\r\n" . $body;
+        return  $this->getHeaders($method, $url, $auth, $queryString) . "\r\n" . ($method === 'GET' ? '' : $queryString);
     }
 
-    private function send($method, $url, $auth,  $params)
+    public function send($method, $url, $auth,  $params)
     {
+        $method = strtoupper($method);
+        if (!in_array($method, $this->accepted_method))
+            throw new MethodException("Invalid method");
+
         try {
             $url =  Uri\Http::createFromString($url);
         } catch (\RuntimeException $e) {
             throw new \InvalidArgumentException($e->getMessage());
         }
-
-        $scheme = $url->getScheme() === "https" ? "ssl://" : "";
-        $host   = $scheme . $url->getHost();
-        $port   = $url->getPort() ?: $this->getDefaultPort($url->getScheme());
-        $request = $this->getRequest($method, $url, $auth, $params);
-        $socket  = @fsockopen($host, $port, $errno, $errstr, $this->connectionTimeout);
+        $socket  = @fsockopen(($url->getScheme() === "https" ? "ssl://" : "") . $url->getHost(), $url->getPort() ?: $this->getPortIfNotDefined($url->getScheme()), $errno, $errstr, $this->connectionTimeout);
         if (!$socket) {
             throw new SocketException($errstr, $errno);
         }
-        fwrite($socket, $request);
+        fwrite($socket,  $this->getRequest($method, $url, $auth, $params));
         fclose($socket);
     }
 }
